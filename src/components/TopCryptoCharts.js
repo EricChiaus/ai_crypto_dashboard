@@ -10,13 +10,13 @@ const TopCryptoCharts = ({ coinData }) => {
   const [historicalData, setHistoricalData] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Get top 10 cryptocurrencies by market cap
+  // Get top cryptocurrency by market cap
   const topCoins = React.useMemo(() => {
     if (!coinData || coinData.size === 0) return [];
-    
+
     return Array.from(coinData.values())
-      .filter(coin => coin.market_cap_rank && coin.market_cap_rank <= 10)
-      .sort((a, b) => a.market_cap_rank - b.market_cap_rank);
+      .filter(coin => coin.market_cap_rank === 1) // Only get #1 ranked crypto
+      .slice(0, 1);
   }, [coinData]);
 
   // Fetch historical data for charts
@@ -196,9 +196,9 @@ const TopCryptoCharts = ({ coinData }) => {
   if (topCoins.length === 0) {
     return (
       <section className="mt-12">
-        <h2 className="text-2xl font-bold mb-6 text-center">Top 10 Cryptocurrencies - 7 Day Performance</h2>
-        <div className="text-center py-8 text-gray-500">
-          Loading cryptocurrency data...
+        <h2 className="text-2xl font-bold mb-6 text-white">Top Cryptocurrency Performance</h2>
+        <div className="text-center py-8 text-gray-400">
+          <p>No cryptocurrency data available</p>
         </div>
       </section>
     );
@@ -206,35 +206,34 @@ const TopCryptoCharts = ({ coinData }) => {
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6 text-center">Top 10 Cryptocurrencies - 7 Day Performance</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {topCoins.map(coin => {
+      <h2 className="text-2xl font-bold mb-6 text-white">Top Cryptocurrency Performance</h2>
+      <div className="grid grid-cols-1 gap-6">
+        {topCoins.map((coin) => {
           const data = historicalData[coin.id];
           if (!data) return null;
 
           return (
-            <div key={coin.id} className="bg-gray-800 rounded-lg p-4 shadow-lg card-hover">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <img src={coin.image} alt={coin.name} className="w-6 h-6" />
+            <div key={coin.id} className="bg-gray-800 rounded-lg p-6 shadow-lg card-hover">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <img 
+                    src={coin.image} 
+                    alt={coin.name} 
+                    className="w-8 h-8 mr-3"
+                  />
                   <div>
-                    <div className="font-medium text-sm">{coin.symbol.toUpperCase()}</div>
-                    <div className="text-xs text-gray-400">#{coin.market_cap_rank}</div>
+                    <h3 className="font-bold text-lg">{coin.name}</h3>
+                    <p className="text-gray-400 text-sm">{coin.symbol.toUpperCase()}</p>
                   </div>
                 </div>
-                <div className={`text-sm font-medium ${data.priceChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {data.priceChange >= 0 ? '+' : ''}{data.priceChange.toFixed(1)}%
+                <div className="text-right">
+                  <p className="font-bold text-lg">${data.currentPrice.toLocaleString()}</p>
+                  <p className={`text-sm ${data.priceChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {data.priceChange >= 0 ? '+' : ''}{data.priceChange.toFixed(2)}%
+                  </p>
                 </div>
               </div>
-              
-              <div className="mb-2">
-                <div className="text-lg font-bold">${data.currentPrice.toFixed(2)}</div>
-                <div className="text-xs text-gray-400">
-                  Market Cap: ${(coin.market_cap / 1e9).toFixed(1)}B
-                </div>
-              </div>
-              
-              <div className="h-32">
+              <div className="chart-container">
                 <canvas ref={el => chartRefs.current[coin.id] = el}></canvas>
               </div>
             </div>

@@ -9,6 +9,18 @@ const AddHolding = ({ onAddHolding, coinData }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
 
+  // Top coins for quick selection
+  const topCoins = [
+    { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
+    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
+    { id: 'binancecoin', name: 'BNB', symbol: 'BNB' },
+    { id: 'solana', name: 'Solana', symbol: 'SOL' },
+    { id: 'ripple', name: 'XRP', symbol: 'XRP' },
+    { id: 'cardano', name: 'Cardano', symbol: 'ADA' },
+    { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE' },
+    { id: 'avalanche-2', name: 'Avalanche', symbol: 'AVAX' }
+  ];
+
   useEffect(() => {
     const searchCoins = async () => {
       if (searchQuery.length < 2) {
@@ -42,6 +54,18 @@ const AddHolding = ({ onAddHolding, coinData }) => {
     setShowResults(false);
   };
 
+  const handleQuickSelect = (coin) => {
+    const coinData = {
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol,
+      image: `https://assets.coingecko.com/coins/images/1/small/${coin.id}.png`
+    };
+    setSelectedCoin(coinData);
+    setSearchQuery(coin.name);
+    setShowResults(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -68,13 +92,32 @@ const AddHolding = ({ onAddHolding, coinData }) => {
   return (
     <section className="bg-gray-800 rounded-lg p-6 mb-8 shadow-lg">
       <h2 className="text-xl font-bold mb-4">Add Holdings</h2>
+      
+      {/* Quick Select Top Coins */}
+      <div className="mb-6">
+        <p className="text-gray-400 text-sm mb-3">Quick Select Popular Coins:</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {topCoins.map(coin => (
+            <button
+              key={coin.id}
+              type="button"
+              onClick={() => handleQuickSelect(coin)}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm transition flex items-center justify-center space-x-2"
+            >
+              <span className="font-medium">{coin.symbol}</span>
+              <span className="text-gray-400">{coin.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search coin..."
+            placeholder="Or search coin..."
             className="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {showResults && (
