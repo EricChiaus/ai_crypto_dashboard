@@ -1,25 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
+import { makeRateLimitedRequest } from '../utils/apiRateLimiter';
 
 export const useCryptoData = () => {
   const [coinData, setCoinData] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [rateLimited, setRateLimited] = useState(false);
 
   const loadCoinData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h'
+      const coins = await makeRateLimitedRequest(
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h',
+        true // High priority for main data
       );
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch cryptocurrency data');
-      }
-      
-      const coins = await response.json();
       const coinMap = new Map();
       
       coins.forEach(coin => {
@@ -29,31 +27,45 @@ export const useCryptoData = () => {
       
       setCoinData(coinMap);
       setLastUpdate(new Date());
+      setRateLimited(false);
     } catch (err) {
-      setError(err.message);
+      if (err.message === 'Rate limit exceeded') {
+        setRateLimited(true);
+        setError('Rate limit exceeded. Please wait a moment before refreshing.');
+      } else {
+        setError(err.message);
+        setRateLimited(false);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
   const refreshData = useCallback(() => {
-    loadCoinData();
-  }, [loadCoinData]);
+    if (!rateLimited) {
+      loadCoinData();
+    }
+  }, [loadCoinData, rateLimited]);
 
   useEffect(() => {
     loadCoinData();
     
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(loadCoinData, 60000);
+    // Auto-refresh every 3 minutes (further reduced to avoid rate limits)
+    const interval = setInterval(() => {
+      if (!rateLimited) {
+        loadCoinData();
+      }
+    }, 180000); // 3 minutes
     
     return () => clearInterval(interval);
-  }, [loadCoinData]);
+  }, [loadCoinData, rateLimited]);
 
   return {
     coinData,
     loading,
     error,
     refreshData,
-    lastUpdate
+    lastUpdate,
+    rateLimited
   };
 };

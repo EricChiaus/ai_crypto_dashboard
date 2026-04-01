@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { makeRateLimitedRequest } from '../utils/apiRateLimiter';
 
 const AddHolding = ({ onAddHolding, coinData }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,18 +18,21 @@ const AddHolding = ({ onAddHolding, coinData }) => {
       }
 
       try {
-        const response = await fetch(
-          `https://api.coingecko.com/api/v3/search?query=${searchQuery}`
+        const data = await makeRateLimitedRequest(
+          `https://api.coingecko.com/api/v3/search?query=${searchQuery}`,
+          false // Low priority for search
         );
-        const data = await response.json();
+        
         setSearchResults(data.coins.slice(0, 5));
         setShowResults(true);
       } catch (error) {
-        console.error('Search error:', error);
+        if (error.message !== 'Rate limit exceeded') {
+          console.error('Search error:', error);
+        }
       }
     };
 
-    const timeoutId = setTimeout(searchCoins, 300);
+    const timeoutId = setTimeout(searchCoins, 600); // Increased debounce delay
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 

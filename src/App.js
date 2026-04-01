@@ -4,6 +4,7 @@ import SummaryCards from './components/SummaryCards';
 import AddHolding from './components/AddHolding';
 import HoldingsTable from './components/HoldingsTable';
 import Charts from './components/Charts';
+import TopCryptoCharts from './components/TopCryptoCharts';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
 import { useCryptoData } from './hooks/useCryptoData';
@@ -80,6 +81,8 @@ function App() {
           portfolio={portfolio}
           coinData={coinData}
         />
+        
+        <TopCryptoCharts coinData={coinData} />
       </main>
       
       <Footer />

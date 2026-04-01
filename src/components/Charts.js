@@ -132,7 +132,7 @@ const Charts = ({ portfolio, coinData }) => {
   }, [portfolio, coinData]);
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <section className="grid grid-cols-1 gap-8">
       <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
         <h2 className="text-xl font-bold mb-4">Portfolio Distribution</h2>
         <div className="chart-container">
