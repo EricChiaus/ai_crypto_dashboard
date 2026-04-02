@@ -48,7 +48,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen text-white">
       {notification && (
         <Notification 
           message={notification.message} 
@@ -59,30 +59,47 @@ function App() {
       <Header onRefresh={handleRefresh} />
       
       <main className="container mx-auto px-4 py-8">
-        <SummaryCards 
-          totalValue={totalValue}
-          totalPL={totalPL}
-          dailyChange={dailyChange}
-          assetCount={assetCount}
-        />
+        {error && (
+          <div className="bg-red-400/20 border border-red-400 text-red-400 px-4 py-3 rounded-lg mb-6">
+            <p>{error}</p>
+          </div>
+        )}
         
-        <AddHolding 
-          onAddHolding={handleAddHolding}
-          coinData={coinData}
-        />
+        {loading && (
+          <div className="text-center py-12">
+            <div className="loading mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading cryptocurrency data...</p>
+          </div>
+        )}
         
-        <HoldingsTable 
-          portfolio={portfolio}
-          coinData={coinData}
-          onRemoveHolding={handleRemoveHolding}
-        />
-        
-        <Charts 
-          portfolio={portfolio}
-          coinData={coinData}
-        />
-        
-        <TopCryptoCharts coinData={coinData} />
+        {!loading && !error && (
+          <>
+            <SummaryCards 
+              totalValue={totalValue}
+              totalPL={totalPL}
+              dailyChange={dailyChange}
+              assetCount={portfolio.length}
+            />
+            
+            <AddHolding 
+              onAddHolding={handleAddHolding}
+              coinData={coinData}
+            />
+            
+            <HoldingsTable 
+              portfolio={portfolio}
+              coinData={coinData}
+              onRemoveHolding={handleRemoveHolding}
+            />
+            
+            <Charts 
+              portfolio={portfolio}
+              coinData={coinData}
+            />
+            
+            <TopCryptoCharts coinData={coinData} />
+          </>
+        )}
       </main>
       
       <Footer />
